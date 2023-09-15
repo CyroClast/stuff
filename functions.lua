@@ -127,12 +127,7 @@ function functions.morseDecode(morsecode)
     return decoded
 end
 
-function functions.testingTestTable()
-    local item1, item2, item3 = functions.testtable[1], functions.testtable[2], functions.testtable[3]
-    return item1, item2, item3
-end
-
-function functions.fastFactorialZeroes(number) -- fast check by division; should be the fastest method.
+function functions.factorialZeroes(number)
     local zeroes = 0
     repeat
         number = number / 5
@@ -140,19 +135,6 @@ function functions.fastFactorialZeroes(number) -- fast check by division; should
     until number < 1
 
     return zeroes
-end
-
-function functions.slowFactorialZeroes(number) -- inefficient check of how many trailing zeroes a factorial will have.
-    local fives = 0
-    if number >= 5 then
-        for i = number - (number % 5), 5, -5 do
-            repeat
-                if i % 5 == 0 then fives, i = fives + 1, i / 5 end
-            until i % 5 ~= 0
-        end
-    end
-
-    return fives
 end
 
 function functions.fibonacci(item) -- will return the *item*th number of the fibonacci sequence, not the numbers until then.
@@ -192,26 +174,6 @@ function functions.shiftASCIILeft(letter, amount)
     return char
 end
 
-function functions.funnyNumberProperty(digit, power)
-    local sum = 0
-
-    for w in string.gmatch(digit, "%d") do
-        sum = sum + tonumber(w) ^ power
-        power = power + 1
-    end
-
-    local exist = sum / digit
-    local fractionary = sum % digit
-
-    if fractionary ~= 0 then
-        exist = -1
-    else
-        exist = sum / digit
-    end
-
-    return exist
-end
-
 function functions.encodeText(text)
     local encrypted = {}
     local place = 1
@@ -234,7 +196,7 @@ function functions.encodeText(text)
     local early = 1
     local late = #encrypted
 
-    -- second step                               the funny thing about this is you could replace it with math.ceil and it would still work.
+    -- second step
     for _2 = 1, math.floor(#encrypted / 2), 1 do
         encrypted[early], encrypted[late] = encrypted[late], encrypted[early] 
         early, late = early + 1, late - 1
@@ -262,19 +224,6 @@ function functions.badArithmeticFunction(a, b, operation)
     end
 end
 
-function functions.isISBN(isbn)
-    local sum, pos = 0, 1
-    for w in string.gmatch(isbn, "%w") do
-        if w == "X" then
-            sum, pos = sum + (10 * pos), pos + 1
-        else
-            sum, pos = sum + (w * pos), pos + 1
-        end
-    end
-
-    if sum % 11 == 0 then return true else return false end
-end
-
 function functions.narcissism(number)
     local narcissism = 0
     for w in string.gmatch(number, "%d") do
@@ -284,17 +233,6 @@ function functions.narcissism(number)
     if narcissism == number then return true else return false end
 end
 
-function functions.quadraticEquation(a, b, c)
-    local root1 = (-b + math.sqrt((b ^ 2) - (4 * a * c))) / (2 * a)
-    local root2 = (-b - math.sqrt((b ^ 2) - (4 * a * c))) / (2 * a)
-
-    if root1 == root1 and root2 == root2 then
-        return root1, root2
-    else
-        return "impossible t", "o calculate"
-    end
-end
-
 function functions.getLastTableItem(table) -- i know this sounds useless, but if a table isnt ordered numerically #table doenst work.
     local lastindex = 0
     for i, v in ipairs(table) do
@@ -302,26 +240,7 @@ function functions.getLastTableItem(table) -- i know this sounds useless, but if
     end
 
     return lastindex
-end
-
-function functions.solveAlphabetSymmetry(array)
-    local answers = {}
-
-    for i, word in ipairs(array) do
-        local strindex = 1
-        local matches = 0
-        for letter in string.gmatch(word, "%a") do
-            if (string.byte(letter) - 64) == strindex or (string.byte(letter) - 96) == strindex then
-                matches = matches + 1
-            end
-            strindex = strindex + 1
-        end
-
-        table.insert(answers, matches)
-    end
-
-    return answers
-end
+end -- future me here, im only keeping this here because i dont know if any of the other functions use it
 
 -- matrix size does not matter, however each row must be the same size as eachother, same applies to collumns.
 -- i'll probrably work on one that works for any matrixes later
@@ -360,11 +279,6 @@ function functions.josephus(people, steps)
     until #people == 0
 
     return permutation
-end
-
-function functions.wait(seconds)
-    local start = os.time()
-    repeat until os.time() > start + seconds
 end
 
 function functions.paintfuckInterpreter(code, iterations, width, height)
@@ -504,7 +418,7 @@ function functions.smallfuckInterpreter(code, tape) -- code is the code, tape is
     return table.concat(tapetable)
 end
 
-function functions.MMC(numbers)
+function functions.MMC(numbers) -- MMC stands for Maior Multiplo Comum which means smallest common divisor (this function is really slow though)
     local currentprime = 2
     local answer = 1
     local done = false
@@ -596,14 +510,14 @@ function functions.MDC(numbers)
     return numbers[#numbers]
 end
 
-function functions.divisors(number)
+function functions.divisors(number) -- this returns pairs of the divisors, not the divisors in order (sorry about that)
     local divisors = {}
     for i = 1, math.floor(math.sqrt(number)) do
         local divided = number / i
         if divided % 1 == 0 then
             table.insert(divisors, divided)
             local extra = number / divided
-            if extra ~= divided then -- if a number is a square root, the algorithm would insert the square root twice; this prevents that.
+            if extra ~= divided then -- if a number is a square root, the algorithm would insert the multiple twice
                 table.insert(divisors, number / divided)
             end
         end
@@ -613,7 +527,6 @@ function functions.divisors(number)
 end
 
 function functions.squaredDivisors(low, high)
-    local clock = os.clock()
     local answers = {}
     for test = low, high do
 
@@ -638,7 +551,7 @@ function functions.squaredDivisors(low, high)
         end
     end
 
-    return answers, clock
+    return answers
 end
 
 return functions
