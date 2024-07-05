@@ -21,12 +21,12 @@ body {
     z-index: -1;
 }
 
-.siderbar {
+#siderbar {
     margin: 0;
     padding: 0;
 }
 
-.sidebar.on{
+.on{
     position: absolute;
     top: 0px;
     height: 100vh;
@@ -46,7 +46,9 @@ body {
 .equation {
     display: grid; /* i didnt make this. if you see gridbox or flexbox, thats probrably not me writing it. that's my mom. say hi to her. */
     box-shadow: 0px 2px 0 0 grey;
-    grid-template-columns: auto 90%;
+    grid-template-areas: 'equation-color equation-delete'
+                         'equation-formula equation-formula';
+    grid-template-columns: 94% 6%; /* need to make equation-formula take up the whole row properly. */
     width: 100%;
     height: 10vh;
 }
@@ -67,7 +69,7 @@ body {
     border: none;
 }
 
-.equation-add {
+#equation-add {
     display: flex;
     padding: 0;
     margin: 0;

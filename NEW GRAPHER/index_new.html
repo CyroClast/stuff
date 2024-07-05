@@ -7,25 +7,9 @@
     <title>Document</title>
 </head>
 <body>
-    <!--
-        for when i finish this..
-        do you think i should start a blog?
-        i like writing about what i think, but making a diary is too personal.
-        but i wonder if people even read blogs. and if they do, would they even find mine interesting?
-        i just play undertale and some other games i like.
-        i'll probrably just write about stuff im doing. i like rambling.
-    -->
-
-    <!-- todo
-        make a color selector for the colored part of the equation formula.
-            not done.
-
-        get a font OR make the text look nice
-            not done.
-    -->
     <canvas id="plot"></canvas>
 
-    <div class="sidebar on">
+    <div id="sidebar" class = "on">
         <button class="sidebar-reveal">hello!</button>
 
         <div class="equation" id="0"> <!-- test equation: exists by default. can still be edited by the user. -->
@@ -34,9 +18,13 @@
             <input type="text" class="equation-formula" id="0"/>
         </div>
 
-        <div class="equation-add"> <!-- will be used to add another equation once you click it -->
-            + <!-- replace with an image of a plus symbol in the future -->
+        <div id="equation-add"> <!-- its id and not class because only one should exist. -->
+            + <!-- replace with an image later -->
         </div>
     </div>
+
+    <script type="module" src="equation_handler.js"></script>
+    <script type="module" src="graph_new.js"></script>
+    <script type="module" src="parser.js"></script>
 </body>
 </html>
