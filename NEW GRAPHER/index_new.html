@@ -9,20 +9,20 @@
 <body>
     <canvas id="plot"></canvas>
 
-    <div id="sidebar" class = "on">
-        <button class="sidebar-reveal">hello!</button>
-
-        <div class="equation" id="0"> <!-- test equation: exists by default. can still be edited by the user. -->
-            <div class="equation-color" id="0"></div>
-            <button class="equation-delete" id="0"></button>
-            <input type="text" class="equation-formula" id="0"/>
+    <div class="sidebar-container">
+        <div id="sidebar" class="on">            
+            <div class="equation" id="0"> <!-- test equation: exists by default. can still be edited by the user. -->
+                <div class="equation-color" id="0"></div>
+                <button class="equation-delete" id="0"></button>
+                <input type="text" class="equation-formula" id="0"/>
+            </div>            
+            <div id="equation-add"> <!-- its id and not class because only one should exist. -->
+                + <!-- replace with an image later -->
+            </div>
         </div>
-
-        <div id="equation-add"> <!-- its id and not class because only one should exist. -->
-            + <!-- replace with an image later -->
-        </div>
-    </div>
-
+        <button id="sidebar-reveal">hello!</button>
+    </div>    
+    
     <script type="module" src="equation_handler.js"></script>
     <script type="module" src="graph_new.js"></script>
     <script type="module" src="parser.js"></script>

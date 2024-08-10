@@ -10,41 +10,46 @@
 }
 
 body {
+    position: relative;
     overflow: hidden;
 }
 
 #plot {
-    margin: 0;
-    padding: 0;
     height: 100vh;
     width: 100vw;
     z-index: -1;
 }
 
-#siderbar {
-    margin: 0;
-    padding: 0;
-}
-
 .on{
-    position: absolute;
-    top: 0px;
     height: 100vh;
     width: 30vw;
     background-color: white; /* temporary color, change later */
     box-shadow: 1px 0px 8px 1px darkgrey;
 }
 
-.sidebar-reveal {
+.off {
+    display: none;
+}
+
+.sidebar-container {
+    display: flex;
+    flex-direction: row;
+    z-index: 1;
     position: absolute;
-    left: calc(100% + 10px); /* i didn't know css could be so...easy.... am i dreaming? */
+    top: 0;
+    left: 0;
+}
+
+#sidebar-reveal {
+    margin-top: 5px;
+    margin-left: 5px;
     height: 50px;
     width: 50px;
     color: black;
 }
 
 .equation {
-    display: grid; /* i didnt make this. if you see gridbox or flexbox, thats probrably not me writing it. that's my mom. say hi to her. */
+    display: grid;
     box-shadow: 0px 2px 0 0 grey;
     grid-template-areas: 'equation-color equation-delete'
                          'equation-formula equation-formula';
@@ -59,7 +64,7 @@ body {
 }
 
 .equation-delete {
-    
+    /* finish this later */
 }
 
 .equation-formula {
