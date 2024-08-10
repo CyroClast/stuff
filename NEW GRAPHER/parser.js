@@ -4,7 +4,7 @@
            operator: (operator),
            right: (num)
            left: (num)}
-    
+
     10 + 5
 
         +
@@ -31,10 +31,6 @@ const token_types = {
     END_OF_FILE: "eof",
 }
 
-const dict = {
-    /-?\d/ : 
-}
-
 class lexer {
 
     tokenize(input = "") {
@@ -44,7 +40,7 @@ class lexer {
 
         while (match = regex.exec(input)) {
             const matched_text = match;
-    
+
             if (/-?\d/.test(matched_text)) { // may get rid of value later if it is unnecessary
                 tokens.push({ type: token_types.NUMBER, value: parseFloat(matched_text) })
             } else if (/\+/.test(matched_text)) {
@@ -116,7 +112,7 @@ class parser {
     // mul & div
     parse_term() {
         let left = this.parse_factor();
-        
+
         while (this.at_cursor().type == token_types.MULTIPLY || this.at_cursor().type == token_types.DIVIDE) { // generalize later
             let op = this.at_cursor().type
             let ttype = this.at_cursor().type
@@ -151,13 +147,13 @@ class parser {
             // code expects parenthesis because telling whether "sin x" is acceptable over "sin(x)" is complicated
             this.eat(token_types.L_PAR);
             let expr;
-            
+
             // i know this is just the parenthesis code but i cant jump to it unfortunately.
             while (this.at_cursor().type !== token_types.R_PAR) {
                 expr = this.parse_expression();
             }
 
-            TouchList.eat(token_types.R_PAR);
+            this.eat(token_types.R_PAR);
             return {type: "UnaryOperator", operator: fun_type, inside: expr}
         }
 
@@ -181,9 +177,9 @@ const test_lexer = new lexer();
 const test_parser = new parser();
 
 let lexed = test_lexer.tokenize(t_exp);
-console.log("from lexer: \n");
-console.log(JSON.stringify(lexed, null, 2) + "\n");
+// console.log("from lexer: \n");
+// console.log(JSON.stringify(lexed, null, 2) + "\n");
 
-// let parsed = test_parser.parse(lexed);
-// console.log("from parser: \n");
-// console.log(JSON.stringify(parsed, null, 2) + "\n");
+let parsed = test_parser.parse(lexed);
+console.log("from parser: \n");
+console.log(JSON.stringify(parsed, null, 2) + "\n");
