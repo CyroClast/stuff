@@ -4,17 +4,23 @@ import { zoom_canvas } from "./graph_new.js";
 import { move_canvas} from "./graph_new.js";
 import { Lexer } from "./parser.js";
 import { Parser } from "./parser.js";
-import { Evaluator } from "./parser.js";
+import { ToFunction } from "./parser.js";
 import { evaluate } from "./parser.js";
+import { Node } from "./node_class.js";
 
 const add_equation = document.getElementById("equation-add");
 const sidebar = document.getElementById("sidebar");
 const sidebar_reveal = document.getElementById("sidebar-reveal");
 const equations = Array.from(document.querySelectorAll(".equation"));
 const canvas = document.getElementById("plot");
-const temp_lexer = new Lexer()
+const node_maker = new Node()
+const temp_lexer = new Lexer() // not very temporary if it's a constant
 
-let variables = []
+let temp_parser = new Parser() // remove later
+let temp_toFunction = new ToFunction()
+
+let nodes = new Map()
+let variables = {}
 let equation_count = equations.length; // how many equations currently exist. important for creating new equations with appropriate ids.    
 for (let i = 0; i < equations.length; i++) { // fixes equations that already existed
     let pl_formula = document.querySelector(`.equation-formula[id='${i}']`)
@@ -39,15 +45,15 @@ function draw_all() {
         let id = equation.id
         let pl_formula = document.querySelector(`.equation-formula[id='${id}']`)
         // check if its a variable equation
-        let result = temp_lexer.tokenize(pl_formula.value, ['x'])
-        console.log(result[0])  
-        if (result[0].type == "var" && result[1].type == "=") {
+        let result = temp_lexer.tokenize(pl_formula.value, ['x']) 
+        if (result[0].type == "undef" && result[1].type == "=") {
             // equation is a variable definition.
             console.log("in");
             let var_value = evaluate((pl_formula.value).substring(pl_formula.value.indexOf("=") + 1), variables, false, false, true, false)[0] // what a mess.
             console.log(var_value);
-            // todo: upgrade equations to hold variables and the formulas
-        } else {draw_curve(pl_formula.value)}
+            let key = result[0].value
+            variables[key] = var_value;
+        } else {draw_curve(pl_formula.value, variables)}
 
     });
 }
@@ -105,15 +111,38 @@ function create_equation() {
     new_equation_formula.setAttribute("input", "text");
     new_equation_formula.setAttribute("class", "equation-formula");
     new_equation_formula.setAttribute("id", equation_count);
-    new_equation_formula.addEventListener("input", draw_all);
+    new_equation_formula.addEventListener("input", () => {update_tree(new_equation_formula.value); draw_all()});
 
     new_equation.appendChild(new_equation_color);
     new_equation.appendChild(new_equation_delete);
     new_equation.appendChild(new_equation_formula);
     sidebar.insertBefore(new_equation, add_equation);
 
-    equations.push(new_equation); // the equation's id is it's index in the "equations" array.
+    // equations.push(new_equation); // the equation's id is it's index in the "equations" array.
 };
+
+function update_tree(equation) {
+    let tokens = temp_lexer.tokenize(equation)
+    let dependencies = []
+    tokens.forEach(element => {
+        // yknow, if i have to put tokens_types.UNDEFINED's value manually, why have that thing anyways?
+        if (element.type == "undef") {dependencies.push(element.value)}
+    });
+    if (tokens[0].type == "undef" && tokens[1].type == "=") {
+        let dependent_entries = [...nodes].filter(([key, node]) => 
+            node.dependencies.includes(tokens[0].value)
+        );
+        // man.. is my code really that good?
+        let tree = temp_parser.parse(temp_lexer.tokenize(equation.substring(equation.indexOf("=") + 1) + "+0"))
+        nodes.set(tokens[0].value, {type: "variable",
+                                    name: tokens[0].value,
+                                    value: temp_toFunction.convert(tree),
+                                    dependencies: [dependencies.slice(1)], // get rid of the first entry because it's the variable itself
+                                    dependents: dependent_entries})
+    }
+    // ugh..
+
+}
 
 /**
  * handles zooming.
@@ -170,3 +199,5 @@ sidebar_reveal.addEventListener("click", () => {
         sidebar.classList.replace('off', 'on')
     }
 });
+
+update_tree("a = 3")

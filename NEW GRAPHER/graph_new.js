@@ -28,7 +28,7 @@ plot.height = screen.availHeight;
  * 
  * @returns {graph} 
  */
-export function draw_curve(func) {
+export function draw_curve(func, vars) {
     plot_CTX.beginPath();
 
     let mathX;
@@ -43,7 +43,7 @@ export function draw_curve(func) {
 
         // idea: instead of draw_curve calling evaluate every time, equation_handler "stores" equations, reducing computation time
         // only problem is i dont know how to store an equation, and calling evaluator() wont do much to fix it.
-        mathY = evaluate(func, {x: mathX}, false, false, true, false);
+        mathY = evaluate(func, { ...{x: mathX}, ...vars}, false, false, true, false);
         // prevent drawing vertical asymptotes (if the change in mathY is wayy too high)
         if (Math.abs(mathY - prevMathY) > Math.abs(minX) + Math.abs(maxX) || mathY == NaN) {
             prevMathY = mathY;

@@ -18,16 +18,17 @@
 
 */
 const token_types = {
-    PLUS: "add",
-    MINUS: "sub",
-    MULTIPLY: "mul",
-    DIVIDE: "div",
+    PLUS: "+",
+    MINUS: "-",
+    MULTIPLY: "*",
+    DIVIDE: "/",
     MODULO: "mod",
 
     L_PAR: "(",
     R_PAR: ")",
     EQUAL: "=",
     NUMBER: "num",
+    FUNCTION: "fun",
     
     SINE: "sin",
     COSINE: "cos",
@@ -35,12 +36,12 @@ const token_types = {
     SECANT: "sec",
     COSECANT: "csc",
     COTANGENT: "cot",
-    ARCSINE: "arcsin",
-    ARCCOSINE: "arccos",
-    ARCTANGENT: "arctan",
-    ARCSECANT: "arcsec",
-    ARCCOSECANT: "arccsc",
-    ARCCOTANGENT: "arccot",
+    ARCSINE: "asin",
+    ARCCOSINE: "acos",
+    ARCTANGENT: "atan",
+    ARCSECANT: "asec",
+    ARCCOSECANT: "acsc",
+    ARCCOTANGENT: "acot",
     FLOOR: "floor",
     CEILING: "ceil",
 
@@ -50,7 +51,6 @@ const token_types = {
 }
 
 export class Lexer {
-    ignore = false // setting to true inserts any unknowns as variables.
     /**
      * 
      * @param {string} input the expression to the tokenized
@@ -127,8 +127,7 @@ export class Lexer {
                 tokens.push({ type: token_types.CEILING, value: "ceil" });
             }
 
-              else {tokens.push({type: token_types.VARIABLE, value: matched_text[0]})}
-            // else {throw Error(`unrecognized token "${matched_text}". did you define it?`)}
+              else {tokens.push({type: token_types.UNDEFINED, value: matched_text[0]})}
         }
         
         tokens.push({ type: token_types.END_OF_FILE, value: null}); // this eof token is important. dont remove it.
@@ -217,7 +216,7 @@ export class Parser {
             let ttype = this.at_cursor().type
             this.eat(equality);
             let right = this.parse_term()
-            left = {type: "Equality", op: ttype, lhs: left, rhs: right}
+            left = {type: "Equality", operand: ttype, lhs: left, rhs: right}
         } else { // assume it's a function
             let fun_type = this.at_cursor().type;
             this.eat(fun_type);
@@ -231,23 +230,29 @@ export class Parser {
             }
 
             this.eat(token_types.R_PAR);
-            return {type: "UnaryOperator", operand: fun_type, inside: expr}
+            return {type: token_types.FUNCTION, operand: fun_type, lhs: expr}
         }
 
         throw new Error(`Unrecognized token ${this.at_cursor().type} at position ${this.cursor}`);
     }
 
+    /**
+     * 
+     * @param {array} lexer_tokens the lexer tokens 
+     * @returns tree
+     */
     parse(lexer_tokens) {
         this.tokens = lexer_tokens;
         return this.parse_expression()
     }
 }
 
+// useless
 export class Evaluator {
     tree = {};
     vars = [];
 
-    operate(func, input1, input2) {
+    operate(func, input1, input2) { // basically a definition of what to do
         if (func === token_types.PLUS) {return input1 + input2;}
         if (func === token_types.MINUS) {return input1 - input2;}
         if (func === token_types.MULTIPLY) {return input1 * input2;}
@@ -259,35 +264,36 @@ export class Evaluator {
             if (input2 === 0) {return Error("Modulo by zero is not allowed")};
             return input1 % input2;
         }
-        if (func === "sin") {return Math.sin(input1);}
-        if (func === "cos") {return Math.cos(input1);}
-        if (func === "tan") {return Math.tan(input1);}
-        if (func === "sec") {return 1/Math.cos(input1);}
-        if (func === "csc") {return 1/Math.sin(input1);}
-        if (func === "cot") {return 1/Math.tan(input1);}
-        if (func === "arcsin") {
+        if (func === token_types.SINE) {return Math.sin(input1);}
+        if (func === token_types.COSINE) {return Math.cos(input1);}
+        if (func === token_types.TANGENT) {return Math.tan(input1);}
+        if (func === token_types.SECANT) {return 1/Math.cos(input1);}
+        if (func === token_types.COSECANT) {return 1/Math.sin(input1);}
+        if (func === token_types.COTANGENT) {return 1/Math.tan(input1);}
+        if (func === token_types.ARCSINE) {
             if (input1 < -1 || input1 > 1) {return Error("Input out of range for arcsin (-1 < x < 1)")};
             return Math.asin(input1);
         }
-        if (func === "arccos") {
+        if (func === token_types.ARCCOSINE) {
             if (input1 < -1 || input1 > 1) {return Error("Input out of range for arccos (-1 < x < 1)")};
             return Math.acos(input1);
         }
-        if (func === "arctan") return Math.atan(input1);
-        if (func === "arcsec") {
+        if (func === token_types.ARCTANGENT) return Math.atan(input1);
+        if (func === token_types.ARCSECANT) {
             if (input1 > -1 || input1 < 1) {return Error("Input out of range for arcsec (-1 > x < 1)")}
             return (Math.asin(1/input1))
         }
-        if (func === "arccsc") {
+        if (func === token_types.ARCCOSECANT) {
             if (input1 > -1 || input1 < 1) {return Error("Input out of range for arccsc (-1 > x < 1)")}
             return (Math.acos(1/input1))
         }
-        if (func === "arccot") {
+        if (func === token_types.ARCCOTANGENT) {
             if (input1 >= 0) {return Math.atan(1/input1);}
             return (Math.atan(1/input1) + Math.PI);
         }
-        if (func === "floor") return Math.floor(input1);
-        if (func === "ceil") return Math.ceil(input1);
+        if (func === token_types.FLOOR) return Math.floor(input1);
+        if (func === token_types.CEILING) return Math.ceil(input1);
+        // why did i try improving this function? im literally about to replace it wtf
         return Error("Unknown function type");
     }
 
@@ -303,25 +309,72 @@ export class Evaluator {
             let leftside = this.calculate(parser_tree.lhs, variables)
             let rightside = this.calculate(parser_tree.rhs, variables)
             return this.operate(operator, leftside, rightside);
-        } else if (parser_tree.type == "UnaryOperator") {
+        } else if (parser_tree.type == token_types.FUNCTION) {
             let operator = parser_tree.operand;
-            let innards = this.calculate(parser_tree.inside, variables)
+            let innards = this.calculate(parser_tree.lhs, variables) // i changed
             return this.operate(operator, innards, null);
         }
     }
 }
 
+// you may be wondering why i didnt make it return a function that's already in order
+// firstly, that's really difficult.
+// secondly, i can let javascript handle that because it's in function form now
+// now that i think about it, i could've just converted functions javascript didnt know and then use new Function()
+// but it's too late for that now lololol
+export class ToFunction {
+    expr = ""
+    /**
+     * @param {object} obj altough it's called obj, you should actually input the tree. it just makes the code easier to understand.
+     * @param {array} variables just like with Lexer.tokenize(), only pass in the names. we dont need the values
+     * 
+     * @returns {string}
+     */
+    alg_fun_calculator(func) { // if any functions require exceptions, like asin, acsc and !, you can put them here
+        if (func == token_types.ARCSECANT) {
+            return "1/Math.asin"
+        } else if (func == token_types.ARCCOSECANT) {
+            return "1/Math.acos"
+        } else if (func == token_types.ARCCOTANGENT) {
+            return "1/Math.atan"
+        } else {
+            return `Math.${func}`
+        }
+    }
+
+    stringify(obj, variables = []) {
+        if (obj.type != token_types.FUNCTION) {
+            obj.lhs.lhs == undefined ? this.expr = this.expr + obj.lhs.value : this.stringify(obj.lhs)
+            this.expr = this.expr + obj.operand
+            obj.rhs.lhs == undefined ? this.expr = this.expr + obj.rhs.value : this.stringify(obj.rhs)
+            console.log(this.expr)
+        }
+        else {
+            this.expr = this.expr + this.alg_fun_calculator(obj.operand) + "("
+            obj.lhs.lhs == undefined ? this.expr = this.expr + obj.lhs.value : this.stringify(obj.lhs)
+            this.expr = this.expr + ")"
+        }
+    }
+
+    convert(obj, variables = []) { // only exists to fix a specific issue. i might tell you what it was..
+        this.stringify(obj, variables) // im so creative at naming things, aren't i?
+        let expr_function = new Function(...variables, `return ${this.expr}`);
+        return expr_function
+    }
+}
+
 /**
- * evaluates a function using variables.
+ * i've just realised a major flaw with this function so i recommend not using it.
+ * you can import lexer, parser and tofunction instead
  * @param {string} expression the expression to be evaluated
- * @param {array} variables any custom variables you want to be included, e.g [alpha: "3.2", beta: "96.3"]
+ * @param {array} variables any custom variables you want to be included, e.g {alpha: "3.2", beta: "96.3"}
  * @param {boolean} lexer whether to return the lexer
  * @param {boolean} parser whether to return the parser
  * @param {boolean} evaluator whether to return the evaluator
  * @param {boolean} log whether to log the results to the console
  * @param {boolean} ignore whether to ignore errors. can be useful if test_parser is returning an error and you just want the result in test_lexer.
  * 
- * @returns {array} your results. ordered, so if you asked for the lexer and evaluator, your array would be [(lexer), (evaluator)]
+ * @returns your results. ordered, so if you asked for the lexer and evaluator, your array would be [(lexer), (evaluator)]
  */
 export function evaluate(expression = "", variables = {}, lexer = false, parser = false, evaluator = false, log = false) {
     let return_list = []
