@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+  app:
+    build: .
+    depends_on:
+      - postgres
+    volumes:
+      - .:/app
+    stdin_open: true
+    tty: true
